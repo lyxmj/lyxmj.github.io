@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专属表白</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* 粉色背景区域（整个页面） */
+        body {
+            background: #ffeff5;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "微软雅黑";
+            user-select: none;
+            position: relative;
+        }
+        /* 开场动画 */
+        .start-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffeff5;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .start-heart {
+            width: 80px;
+            height: 80px;
+            background: #ff4d6d;
+            transform: rotate(45deg) scale(0);
+            animation: heartBounce 1.5s ease forwards;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .start-heart::before, .start-heart::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: #ff4d6d;
+            border-radius: 50%;
+        }
+        .start-heart::before {
+            top: -40px;
+            left: 0;
+        }
+        .start-heart::after {
+            top: 0;
+            left: -40px;
+        }
+        .start-text {
+            color: #ff4d6d;
+            font-size: 22px;
+            opacity: 0;
+            animation: textFade 1s ease 1s forwards;
+        }
+        @keyframes heartBounce {
+            0% { transform: rotate(45deg) scale(0); }
+            50% { transform: rotate(45deg) scale(1.2); }
+            100% { transform: rotate(45deg) scale(1); }
+        }
+        @keyframes textFade {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* 主界面 */
+        .main-box {
+            background: #fff;
+            padding: 40px 60px 60px 60px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 77, 109, 0.2);
+            text-align: center;
+            display: none;
+            z-index: 10;
+            position: relative;
+            min-height: 200px;
+        }
+        .main-title {
+            color: #ff4d6d;
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
+        /* 同意按钮 */
+        .btn-accept {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+            background: #ff4d6d;
+            color: #fff;
+            position: relative;
+            z-index: 11;
+        }
+        .btn-accept:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 77, 109, 0.4);
+        }
+        /* 拒绝按钮（粉色区域内移动+特效） */
+        .btn-refuse {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            background: #ffd6e0;
+            color: #ff4d6d;
+            position: fixed; /* 粉色背景区域内定位 */
+            z-index: 9;
+            width: 120px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 初始隐藏 */
+            display: none;
+            /* 基础阴影 */
+            box-shadow: 0 2px 8px rgba(255, 105, 135, 0.2);
+        }
+        /* hover特效：发光+轻微上浮 */
+        .btn-refuse:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 77, 109, 0.5);
+            background: #ffe8ef;
+            top: -5px;
+        }
+        /* 点击特效：短暂放大+变色 */
+        .btn-refuse.click-effect {
+            animation: clickAnim 0.5s ease forwards;
+        }
+        @keyframes clickAnim {
+            0% { transform: scale(1.1); }
+            50% { transform: scale(1.2); background: #ffc2d1; }
+            100% { transform: scale(1.05); background: #ffd6e0; }
+        }
+        /* 提示文字（增强版：多行+动态描述） */
+        .tip-container {
+            color: #ff8fa3;
+            font-size: 14px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 11;
+            line-height: 1.5;
+            min-height: 40px;
+            /* 强制显示，确保不被遮挡 */
+            display: block !important;
+        }
+        .tip-count {
+            font-weight: bold;
+            color: #ff4d6d;
+        }
+        /* 粒子特效容器 */
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff4d6d;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.8;
+            animation: particleAnim 1s ease forwards;
+        }
+        @keyframes particleAnim {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 0.6; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        /* 结尾动画 */
+        .end-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffeff5;
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ff4d6d;
+        }
+        .end-heart {
+            width: 100px;
+            height: 100px;
+            background: #ff4d6d;
+            transform: rotate(45deg) scale(0);
+            animation: endHeartBounce 1.5s ease forwards;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .end-heart::before, .end-heart::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: #ff4d6d;
+            border-radius: 50%;
+        }
+        .end-heart::before {
+            top: -50px;
+            left: 0;
+        }
+        .end-heart::after {
+            top: 0;
+            left: -50px;
+        }
+        @keyframes endHeartBounce {
+            0% { transform: rotate(45deg) scale(0); }
+            50% { transform: rotate(45deg) scale(1.3); }
+            70% { transform: rotate(45deg) scale(1); }
+            100% { transform: rotate(45deg) scale(1.2); }
+        }
+        .end-text {
+            font-size: 30px;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: endTextFade 1s ease 1s forwards;
+        }
+        .end-subtext {
+            font-size: 18px;
+            color: #ff8fa3;
+            opacity: 0;
+            animation: endTextFade 1s ease 1.5s forwards;
+        }
+        @keyframes endTextFade {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* 漂浮爱心 */
+        .float-heart {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ff8fa3;
+            transform: rotate(45deg);
+            opacity: 0.7;
+        }
+        .float-heart::before, .float-heart::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ff8fa3;
+            border-radius: 50%;
+        }
+        .float-heart::before {
+            top: -6px;
+            left: 0;
+        }
+        .float-heart::after {
+            top: 0;
+            left: -6px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 音效文件 -->
+    <audio id="soundStart" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" preload="auto"></audio>
+    <audio id="soundRefuseHover" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" preload="auto"></audio>
+    <audio id="soundRefuseClick" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" preload="auto"></audio>
+    <audio id="soundAccept" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" preload="auto"></audio>
+    <audio id="soundEnd" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3" preload="auto"></audio>
+
+    <!-- 开场动画 -->
+    <div class="start-box" id="startBox">
+        <div class="start-heart"></div>
+        <div class="start-text">宝贝～我有话对你说❤️</div>
+    </div>
+
+    <!-- 主界面（修改提示文字容器） -->
+    <div class="main-box" id="mainBox">
+        <div class="main-title">做我女朋友好不好？❤️</div>
+        <button class="btn-accept" id="btnAccept">我愿意❤️</button>
+        <!-- 增强版提示容器：显示动态拒绝描述 -->
+        <div class="tip-container" id="tipContainer">还没有拒绝我哦～快点击下方的"再考虑考虑"试试😜</div>
+    </div>
+
+    <!-- 拒绝按钮（粉色区域内移动+特效） -->
+    <button class="btn-refuse" id="btnRefuse">再考虑考虑</button>
+
+    <!-- 结尾动画 -->
+    <div class="end-box" id="endBox">
+        <div class="end-heart"></div>
+        <div class="end-text">爱你不止一万遍❤️</div>
+        <div class="end-subtext">—— 专属你的小浪漫</div>
+    </div>
+
+    <script>
+        // ========== 核心变量（修改：拒绝次数增至50次） ==========
+        const startBox = document.getElementById('startBox');
+        const mainBox = document.getElementById('mainBox');
+        const btnRefuse = document.getElementById('btnRefuse');
+        const btnAccept = document.getElementById('btnAccept');
+        const tipContainer = document.getElementById('tipContainer'); // 替换为新容器
+        const endBox = document.getElementById('endBox');
+        
+        let refuseCount = 0; // 初始拒绝次数0
+        const maxRefuse = 50; // 拒绝次数增至50次
+        // 拒绝提示文案库（按次数区间生成不同文案）
+        const refuseTexts = [
+            (count) => `你已经拒绝我<span class="tip-count">${count}</span>次了，要不要这么狠心😣`,
+            (count) => `呜呜呜～第<span class="tip-count">${count}</span>次拒绝我，我的心都碎了💔`,
+            (count) => `都拒绝我<span class="tip-count">${count}</span>次了，就不能心疼心疼我嘛🥺`,
+            (count) => `第<span class="tip-count">${count}</span>次被拒绝，我快要哭了😭`,
+            (count) => `拒绝我<span class="tip-count">${count}</span>次还不够嘛～求求你答应我吧🙏`,
+            (count) => `已经<span class="tip-count">${count}</span>次了，我的爱意都快被浇灭了💧`,
+            (count) => `第<span class="tip-count">${count}</span>次拒绝，难道我不可爱嘛🥹`,
+            (count) => `拒绝我<span class="tip-count">${count}</span>次，我还会继续坚持的💪`
+        ];
+        // 粉色区域边界（整个页面，避开主界面）
+        let pinkArea = {
+            minX: 20,
+            maxX: window.innerWidth - 140, // 120px按钮+20px边距
+            minY: 100, // 顶部100px，避开开场动画
+            maxY: window.innerHeight - 100 // 底部100px
+        };
+
+        // ========== 音效播放 ==========
+        function playSound(soundId) {
+            const sound = document.getElementById(soundId);
+            if (!sound) return;
+            sound.volume = 0.5;
+            sound.currentTime = 0;
+            try {
+                sound.play();
+            } catch (e) {
+                document.body.addEventListener('click', () => {
+                    sound.play();
+                }, { once: true });
+            }
+        }
+
+        // ========== 粒子特效生成 ==========
+        function createParticles(x, y) {
+            // 生成8-12个随机粒子
+            const particleCount = Math.floor(Math.random() * 4) + 8;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                // 随机位置（按钮周围）
+                const offsetX = Math.random() * 60 - 30;
+                const offsetY = Math.random() * 60 - 30;
+                particle.style.left = (x + offsetX) + 'px';
+                particle.style.top = (y + offsetY) + 'px';
+                // 随机大小和颜色
+                const size = Math.random() * 6 + 4;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.background = `rgb(255, ${Math.floor(Math.random() * 80) + 100}, ${Math.floor(Math.random() * 80) + 120})`;
+                // 随机动画时长
+                particle.style.animation = `particleAnim ${Math.random() * 0.5 + 0.5}s ease forwards`;
+                
+                document.body.appendChild(particle);
+                // 1秒后移除粒子
+                setTimeout(() => {
+                    particle.remove();
+                }, 1000);
+            }
+        }
+
+        // ========== 拒绝按钮随机位置生成（粉色区域内） ==========
+        function getRandomPosInPinkArea() {
+            // 更新区域边界（适配窗口缩放）
+            pinkArea = {
+                minX: 20,
+                maxX: window.innerWidth - 140,
+                minY: 100,
+                maxY: window.innerHeight - 100
+            };
+            // 避开主界面区域
+            const mainRect = mainBox.getBoundingClientRect();
+            let randomX, randomY;
+            // 确保不进入主界面区域
+            do {
+                randomX = Math.floor(Math.random() * (pinkArea.maxX - pinkArea.minX + 1)) + pinkArea.minX;
+                randomY = Math.floor(Math.random() * (pinkArea.maxY - pinkArea.minY + 1)) + pinkArea.minY;
+            } while (
+                randomX > mainRect.left - 60 && randomX < mainRect.right + 60 &&
+                randomY > mainRect.top - 60 && randomY < mainRect.bottom + 60
+            );
+            return { x: randomX, y: randomY };
+        }
+
+        // ========== 更新拒绝提示文字（核心修复） ==========
+        function updateRefuseTip(count) {
+            // 强制触发DOM更新
+            tipContainer.style.opacity = 0;
+            setTimeout(() => {
+                if (count === 0) {
+                    tipContainer.innerHTML = '还没有拒绝我哦～快点击下方的"再考虑考虑"试试😜';
+                    tipContainer.style.opacity = 1;
+                    return;
+                }
+                // 随机选择文案模板（避免重复）
+                const textIndex = Math.floor(Math.random() * refuseTexts.length);
+                const tipText = refuseTexts[textIndex](count);
+                tipContainer.innerHTML = tipText;
+                
+                // 次数里程碑特殊提示
+                if (count % 10 === 0 && count > 0) {
+                    tipContainer.innerHTML += `<br><span style="color:#ff4d6d; font-weight:bold;">都${count}次了，就答应我吧～❤️</span>`;
+                }
+                tipContainer.style.opacity = 1;
+            }, 10);
+        }
+
+        // ========== 全屏防退出功能 ==========
+        function forceFullScreen() {
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) docEl.requestFullscreen();
+            else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
+            else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+            else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+        }
+        function checkFullScreen() {
+            if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
+                setTimeout(forceFullScreen, 100);
+            }
+        }
+        let closeBlockCount = 0;
+        window.addEventListener('beforeunload', function(e) {
+            e.preventDefault();
+            e.returnValue = '';
+            closeBlockCount++;
+            if (closeBlockCount >= 2) alert('不许走！必须答应我～❤️');
+            return '不许走！必须答应我～❤️';
+        });
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            alert('别想右键搞小动作～😜');
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode === 116) {
+                e.preventDefault();
+                alert('不许刷新！😠');
+            }
+            if (e.keyCode === 27) {
+                e.preventDefault();
+                alert('退出全屏也没用～乖乖答应吧❤️');
+                forceFullScreen();
+            }
+            if (e.altKey && e.keyCode === 115) {
+                e.preventDefault();
+                alert('想关闭我？没门～😜');
+            }
+        });
+
+        // ========== 初始化漂浮爱心 ==========
+        function createFloatHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'float-heart';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.top = Math.random() * 100 + 'vh';
+            heart.style.animation = `float ${Math.random() * 3 + 2}s linear infinite`;
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0% { transform: rotate(45deg) translate(0, 0); opacity: 0.7; }
+                50% { transform: rotate(45deg) translate(-10px, -15px); opacity: 0.5; }
+                100% { transform: rotate(45deg) translate(-20px, -30px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ========== 开场动画逻辑 ==========
+        setTimeout(() => {
+            playSound('soundStart');
+            forceFullScreen();
+            setInterval(checkFullScreen, 1000);
+            startBox.style.display = 'none';
+            mainBox.style.display = 'block';
+            // 显示拒绝按钮并设置初始位置（粉色区域内）
+            const initPos = getRandomPosInPinkArea();
+            btnRefuse.style.display = 'flex';
+            btnRefuse.style.left = initPos.x + 'px';
+            btnRefuse.style.top = initPos.y + 'px';
+            // 初始化提示文字（强制触发）
+            updateRefuseTip(0);
+            // 开始生成漂浮爱心
+            setInterval(createFloatHeart, 600);
+        }, 3000);
+
+        // ========== 拒绝按钮交互逻辑（hover+click特效） ==========
+        // hover特效：音效+粒子+位置微调
+        btnRefuse.addEventListener('mouseenter', function() {
+            playSound('soundRefuseHover');
+            // 生成hover粒子特效
+            const rect = this.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            createParticles(centerX, centerY);
+            // 轻微微调位置（粉色区域内）
+            const newPos = getRandomPosInPinkArea();
+            this.style.left = newPos.x + 'px';
+            this.style.top = newPos.y + 'px';
+        });
+
+        // click特效：音效+点击动画+粒子+位置随机（核心修复：确保文案更新）
+        btnRefuse.addEventListener('click', function() {
+            playSound('soundRefuseClick');
+            // 添加点击动画类
+            this.classList.add('click-effect');
+            setTimeout(() => {
+                this.classList.remove('click-effect');
+            }, 500);
+            // 生成点击粒子特效（更多粒子）
+            const rect = this.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            createParticles(centerX, centerY);
+            createParticles(centerX + 20, centerY + 10); // 额外粒子
+            
+            // 先累加次数，再强制更新文案
+            refuseCount++;
+            console.log('拒绝次数：', refuseCount); // 调试日志，可查看次数
+            updateRefuseTip(refuseCount); // 强制调用更新函数
+
+            // 50次后禁用按钮
+            if (refuseCount >= maxRefuse) {
+                // 强制设置最终文案
+                tipContainer.innerHTML = `哼！拒绝我<span class="tip-count">${maxRefuse}</span>次了，这辈子赖定你了～只能选同意😜`;
+                btnRefuse.disabled = true;
+                btnRefuse.style.opacity = 0.7;
+                btnRefuse.textContent = '赖定你啦～';
+                btnRefuse.style.pointerEvents = 'none'; // 禁用交互
+                return;
+            }
+
+            // 随机移动到粉色区域内新位置
+            const newPos = getRandomPosInPinkArea();
+            this.style.left = newPos.x + 'px';
+            this.style.top = newPos.y + 'px';
+        });
+
+        // ========== 同意按钮逻辑 ==========
+        btnAccept.addEventListener('click', function() {
+            playSound('soundAccept');
+            mainBox.style.display = 'none';
+            btnRefuse.style.display = 'none';
+            endBox.style.display = 'flex';
+            playSound('soundEnd');
+
+            closeBlockCount = 0;
+            window.removeEventListener('beforeunload', arguments.callee);
+
+            setTimeout(() => {
+                alert('爱你哟～下次再欺负你😘');
+                window.close();
+            }, 4000);
+        });
+
+        // ========== 页面点击解锁音效 ==========
+        document.body.addEventListener('click', () => {
+            playSound('soundStart');
+        }, { once: true });
+
+        // ========== 窗口缩放适配 ==========
+        window.addEventListener('resize', function() {
+            if (btnRefuse.style.display === 'flex' && !btnRefuse.disabled) {
+                const newPos = getRandomPosInPinkArea();
+                btnRefuse.style.left = newPos.x + 'px';
+                btnRefuse.style.top = newPos.y + 'px';
+            }
+        });
+    </script>
+</body>
+</html>
